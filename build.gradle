@@ -18,3 +18,7 @@ allprojects {
         options.encoding = 'UTF-8'
     }
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.10'
+}
