@@ -21,6 +21,7 @@ import android.content.res.AssetManager;
 import android.graphics.PointF;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import android.util.Log;
 
 import java.io.InputStream;
@@ -112,6 +113,7 @@ public class GPUImageFilter {
         mGLUniformTexture = GLES20.glGetUniformLocation(mGLProgId, "inputImageTexture");
         mGLAttribTextureCoordinate = GLES20.glGetAttribLocation(mGLProgId,
                 "inputTextureCoordinate");
+        GLES20.glUseProgram(mGLProgId);
         mIsInitialized = true;
     }
 
@@ -174,6 +176,7 @@ public class GPUImageFilter {
     protected void runPendingOnDrawTasks() {
         while (!mRunOnDraw.isEmpty()) {
             mRunOnDraw.removeFirst().run();
+            logError();
         }
     }
 
@@ -202,7 +205,12 @@ public class GPUImageFilter {
     }
 
     public int getUniformTexture() {
+
         return mGLUniformTexture;
+    }
+
+    public void logError(){
+        Log.i("GPUImageFilter", GLUtils.getEGLErrorString(GLES20.glGetError()));
     }
 
     protected void setInteger(final int location, final int intValue) {
