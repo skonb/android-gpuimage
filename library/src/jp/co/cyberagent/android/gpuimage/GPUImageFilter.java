@@ -19,7 +19,9 @@ package jp.co.cyberagent.android.gpuimage;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.PointF;
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.util.Log;
 
 import java.io.InputStream;
 import java.nio.FloatBuffer;
@@ -38,8 +40,9 @@ public class GPUImageFilter {
             "    textureCoordinate = inputTextureCoordinate.xy;\n" +
             "}";
     public static final String NO_FILTER_FRAGMENT_SHADER = "" +
-            "varying highp vec2 textureCoordinate;\n" +
+            "precision mediump float;\n" +
             " \n" +
+            "varying vec2 textureCoordinate;\n" +
             "uniform sampler2D inputImageTexture;\n" +
             " \n" +
             "void main()\n" +
@@ -47,9 +50,10 @@ public class GPUImageFilter {
             "     gl_FragColor = texture2D(inputImageTexture, textureCoordinate);\n" +
             "}";
 
+
     private final LinkedList<Runnable> mRunOnDraw;
-    private final String mVertexShader;
-    private final String mFragmentShader;
+    private String mVertexShader;
+    private String mFragmentShader;
     protected int mGLProgId;
     protected int mGLAttribPosition;
     protected int mGLUniformTexture;
@@ -57,6 +61,8 @@ public class GPUImageFilter {
     protected int mOutputWidth;
     protected int mOutputHeight;
     private boolean mIsInitialized;
+    protected int mGLTexture = GLES20.GL_TEXTURE0;
+    protected boolean mExternalOES;
 
     public GPUImageFilter() {
         this(NO_FILTER_VERTEX_SHADER, NO_FILTER_FRAGMENT_SHADER);
@@ -67,6 +73,32 @@ public class GPUImageFilter {
         mVertexShader = vertexShader;
         mFragmentShader = fragmentShader;
     }
+
+    public void reloadShaders() {
+        String fragmentShader = mFragmentShader;
+        String vertexShader = mVertexShader;
+        if (mExternalOES) {
+            if (!fragmentShader.contains("#extension GL_OES_EGL_image_external : require\n")) {
+                fragmentShader = "#extension GL_OES_EGL_image_external : require\n" + fragmentShader;
+                fragmentShader = fragmentShader.replaceAll("sampler2D", "samplerExternalOES");
+            }
+        } else {
+            if (fragmentShader.contains("#extension GL_OES_EGL_image_external : require\n")) {
+                fragmentShader = fragmentShader.replace("#extension GL_OES_EGL_image_external : require\n", "");
+                fragmentShader = fragmentShader.replaceAll("samplerExternalOES", "sampler2D");
+            }
+        }
+        mVertexShader = vertexShader;
+        mFragmentShader = fragmentShader;
+        runOnDraw(new Runnable() {
+            @Override
+            public void run() {
+                destroy();
+                init();
+            }
+        });
+    }
+
 
     public final void init() {
         onInit();
@@ -102,6 +134,7 @@ public class GPUImageFilter {
 
     public void onDraw(final int textureId, final FloatBuffer cubeBuffer,
                        final FloatBuffer textureBuffer) {
+
         GLES20.glUseProgram(mGLProgId);
         runPendingOnDrawTasks();
         if (!mIsInitialized) {
@@ -116,18 +149,27 @@ public class GPUImageFilter {
                 textureBuffer);
         GLES20.glEnableVertexAttribArray(mGLAttribTextureCoordinate);
         if (textureId != OpenGlUtils.NO_TEXTURE) {
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-            GLES20.glUniform1i(mGLUniformTexture, 0);
+            GLES20.glActiveTexture(mGLTexture);
+            if (mExternalOES) {
+                GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
+            } else {
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+            }
+            GLES20.glUniform1i(mGLUniformTexture, mGLTexture - GLES20.GL_TEXTURE0);
         }
         onDrawArraysPre();
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glDisableVertexAttribArray(mGLAttribPosition);
         GLES20.glDisableVertexAttribArray(mGLAttribTextureCoordinate);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+        if (mExternalOES) {
+            GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+        } else {
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+        }
     }
 
-    protected void onDrawArraysPre() {}
+    protected void onDrawArraysPre() {
+    }
 
     protected void runPendingOnDrawTasks() {
         while (!mRunOnDraw.isEmpty()) {
@@ -250,7 +292,7 @@ public class GPUImageFilter {
         });
     }
 
-    protected void runOnDraw(final Runnable runnable) {
+    public void runOnDraw(final Runnable runnable) {
         synchronized (mRunOnDraw) {
             mRunOnDraw.addLast(runnable);
         }
@@ -274,5 +316,25 @@ public class GPUImageFilter {
     public static String convertStreamToString(java.io.InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
+    }
+
+    public int getGLTexture() {
+        return mGLTexture;
+    }
+
+    public void setGLTexture(int mGLTexture) {
+        this.mGLTexture = mGLTexture;
+    }
+
+    public boolean isExternalOES() {
+        return mExternalOES;
+    }
+
+    public void setExternalOES(boolean mExternalOES) {
+        if (this.mExternalOES != mExternalOES) {
+            this.mExternalOES = mExternalOES;
+            reloadShaders();
+        }
+
     }
 }

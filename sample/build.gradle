@@ -5,6 +5,7 @@ android {
     buildToolsVersion BUILD_TOOLS_VERSION
 
     defaultConfig {
+        applicationId 'me.skonb.android_gpuimage.sample'
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
     }
@@ -36,4 +37,5 @@ dependencies {
     compile project(':library')
 //    compile 'jp.co.cyberagent.android.gpuimage:gpuimage-library:+@aar'
     compile 'com.android.support:support-v4:21.+'
+    compile 'com.github.skonb:fenster:78b6a3e3a5'
 }

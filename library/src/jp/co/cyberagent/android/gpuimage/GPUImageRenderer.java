@@ -30,6 +30,7 @@ import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -50,32 +51,32 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
             1.0f, 1.0f,
     };
 
-    private GPUImageFilter mFilter;
+    protected GPUImageFilter mFilter;
 
     public final Object mSurfaceChangedWaiter = new Object();
 
-    private int mGLTextureId = NO_IMAGE;
-    private SurfaceTexture mSurfaceTexture = null;
-    private final FloatBuffer mGLCubeBuffer;
-    private final FloatBuffer mGLTextureBuffer;
-    private IntBuffer mGLRgbBuffer;
+    protected int mGLTextureId = NO_IMAGE;
+    protected SurfaceTexture mSurfaceTexture = null;
+    protected final FloatBuffer mGLCubeBuffer;
+    protected final FloatBuffer mGLTextureBuffer;
+    protected IntBuffer mGLRgbBuffer;
 
-    private int mOutputWidth;
-    private int mOutputHeight;
-    private int mImageWidth;
-    private int mImageHeight;
-    private int mAddedPadding;
+    protected int mOutputWidth;
+    protected int mOutputHeight;
+    protected int mImageWidth;
+    protected int mImageHeight;
+    protected int mAddedPadding;
 
-    private final Queue<Runnable> mRunOnDraw;
-    private final Queue<Runnable> mRunOnDrawEnd;
-    private Rotation mRotation;
-    private boolean mFlipHorizontal;
-    private boolean mFlipVertical;
-    private GPUImage.ScaleType mScaleType = GPUImage.ScaleType.CENTER_CROP;
+    protected final Queue<Runnable> mRunOnDraw;
+    protected final Queue<Runnable> mRunOnDrawEnd;
+    protected Rotation mRotation = Rotation.NORMAL;
+    protected boolean mFlipHorizontal;
+    protected boolean mFlipVertical;
+    protected GPUImage.ScaleType mScaleType = GPUImage.ScaleType.CENTER_CROP;
 
-    private float mBackgroundRed = 0;
-    private float mBackgroundGreen = 0;
-    private float mBackgroundBlue = 0;
+    protected float mBackgroundRed = 0;
+    protected float mBackgroundGreen = 0;
+    protected float mBackgroundBlue = 0;
 
     public GPUImageRenderer(final GPUImageFilter filter) {
         mFilter = filter;
@@ -127,9 +128,9 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
     /**
      * Sets the background color
      *
-     * @param red red color value
+     * @param red   red color value
      * @param green green color value
-     * @param blue red color value
+     * @param blue  red color value
      */
     public void setBackgroundColor(float red, float green, float blue) {
         mBackgroundRed = red;
@@ -137,7 +138,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         mBackgroundBlue = blue;
     }
 
-    private void runAll(Queue<Runnable> queue) {
+    protected void runAll(Queue<Runnable> queue) {
         synchronized (queue) {
             while (!queue.isEmpty()) {
                 queue.poll().run();
@@ -267,7 +268,7 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         return mOutputHeight;
     }
 
-    private void adjustImageScaling() {
+    protected void adjustImageScaling() {
         float outputWidth = mOutputWidth;
         float outputHeight = mOutputHeight;
         if (mRotation == Rotation.ROTATION_270 || mRotation == Rotation.ROTATION_90) {
@@ -310,12 +311,12 @@ public class GPUImageRenderer implements Renderer, PreviewCallback {
         mGLTextureBuffer.put(textureCords).position(0);
     }
 
-    private float addDistance(float coordinate, float distance) {
+    protected float addDistance(float coordinate, float distance) {
         return coordinate == 0.0f ? distance : 1 - distance;
     }
 
     public void setRotationCamera(final Rotation rotation, final boolean flipHorizontal,
-            final boolean flipVertical) {
+                                  final boolean flipVertical) {
         setRotation(rotation, flipVertical, flipHorizontal);
     }
 
