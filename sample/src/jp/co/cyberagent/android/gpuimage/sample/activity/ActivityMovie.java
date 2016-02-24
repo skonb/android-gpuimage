@@ -24,9 +24,13 @@ import jp.co.cyberagent.android.gpuimage.sample.R;
 public class ActivityMovie extends Activity implements View.OnClickListener {
 
     FensterVideoView videoView;
-    GPUImageFilter filter = new GPUImageFilter();
+    GPUImageFilter filter = null;
 
     class Renderer extends GPUImageTextureRenderer implements FensterVideoView.Renderer {
+        public Renderer() {
+            super();
+        }
+
         public Renderer(final GPUImageFilter filter) {
             super(filter);
         }
@@ -37,7 +41,8 @@ public class ActivityMovie extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie);
         videoView = (FensterVideoView) findViewById(R.id.video_view);
-        videoView.setRenderer(new Renderer(filter));
+        videoView.setRenderer(new Renderer());
+        filter = ((GPUImageTextureRenderer) videoView.getRenderer()).getFilter();
         videoView.setVideo("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4", 0);
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override

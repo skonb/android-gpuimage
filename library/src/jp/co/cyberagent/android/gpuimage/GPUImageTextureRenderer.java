@@ -56,6 +56,10 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
             1.0f, 1.0f,
     };
 
+    public GPUImageTextureRenderer() {
+        this(new GPUImageFilter());
+    }
+
     public GPUImageTextureRenderer(final GPUImageFilter filter) {
         super(filter);
         screenCubeBuffer = ByteBuffer.allocateDirect(CUBE.length * 4)
@@ -437,5 +441,8 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
         mGLTextureBuffer.put(TEXTURE_NO_ROTATION).position(0);
     }
 
+    public GPUImageFilter getFilter() {
+        return mFilter;
+    }
 
 }
