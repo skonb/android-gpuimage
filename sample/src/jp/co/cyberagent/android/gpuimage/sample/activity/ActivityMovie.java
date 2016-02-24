@@ -27,6 +27,7 @@ import jp.co.cyberagent.android.gpuimage.GPUImageTextureRenderer;
 import jp.co.cyberagent.android.gpuimage.GPUImageWhiteBalanceFilter;
 import jp.co.cyberagent.android.gpuimage.Rotation;
 import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools;
+import jp.co.cyberagent.android.gpuimage.sample.GPUImageRecordableTextureRenderer;
 import jp.co.cyberagent.android.gpuimage.sample.R;
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
@@ -36,7 +37,7 @@ public class ActivityMovie extends Activity implements View.OnClickListener {
     FensterVideoView videoView;
     GPUImageFilter filter = null;
 
-    class Renderer extends GPUImageTextureRenderer implements FensterVideoView.Renderer {
+    class Renderer extends GPUImageRecordableTextureRenderer implements FensterVideoView.Renderer {
         public Renderer() {
             super();
         }

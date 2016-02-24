@@ -20,6 +20,7 @@ import android.annotation.TargetApi;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -199,11 +200,11 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
         eglSurface = egl.eglCreateWindowSurface(eglDisplay, eglConfig, outputTexture, null);
 
         if (eglSurface == null || eglSurface == EGL10.EGL_NO_SURFACE) {
-            throw new RuntimeException("GL Error: ");// + GLUtils.getEGLErrorString(egl.eglGetError()));
+            throw new RuntimeException("GL Error: " + GLUtils.getEGLErrorString(egl.eglGetError()));
         }
 
         if (!egl.eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) {
-            throw new RuntimeException("GL Make current error: ");// + GLUtils.getEGLErrorString(egl.eglGetError()));
+            throw new RuntimeException("GL Make current error: " + GLUtils.getEGLErrorString(egl.eglGetError()));
         }
     }
 
@@ -236,7 +237,7 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
         int[] configSpec = getConfig();
 
         if (!egl.eglChooseConfig(eglDisplay, configSpec, configs, 1, configsCount)) {
-            throw new IllegalArgumentException("Failed to choose config: ");// + GLUtils.getEGLErrorString(egl.eglGetError()));
+            throw new IllegalArgumentException("Failed to choose config: " + GLUtils.getEGLErrorString(egl.eglGetError()));
         } else if (configsCount[0] > 0) {
             return configs[0];
         }
@@ -305,12 +306,20 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         mNoFilter.onDraw(textures[0], mGLCubeBuffer, mGLTextureBuffer);
+
+
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glViewport(0, 0, mOutputWidth, mOutputHeight);
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         mFilter.onDraw(offScreenTextures[0], screenCubeBuffer, screenTextureBuffer);
+
+        onDrawAfterNoFilter();
         return true;
+    }
+
+    protected void onDrawAfterNoFilter() {
+
     }
 
 
@@ -349,7 +358,7 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
     public void checkGlError(String op) {
         int error;
         while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-            Log.e("SurfaceTest", op + ": glError ");// + GLUtils.getEGLErrorString(error));
+            Log.e("SurfaceTest", op + ": glError " + GLUtils.getEGLErrorString(error));
         }
     }
 

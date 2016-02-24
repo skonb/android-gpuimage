@@ -19,6 +19,7 @@ android {
             renderscript.srcDirs = ['src']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['jniLibs']
         }
 
         instrumentTest.setRoot('tests')
@@ -39,4 +40,6 @@ dependencies {
     compile 'com.android.support:support-v4:21.+'
     compile 'com.github.skonb:fenster:78b6a3e3a5'
     compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.3'
+    compile 'org.bytedeco:javacv:1.1'
+    compile 'org.bytedeco:javacpp:1.1'
 }
