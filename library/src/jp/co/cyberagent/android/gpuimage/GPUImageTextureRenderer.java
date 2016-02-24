@@ -29,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -40,6 +41,8 @@ import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
 
 import static jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil.TEXTURE_NO_ROTATION;
 import static jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil.TEXTURE_ROTATED_180;
+import static jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil.TEXTURE_ROTATED_270;
+import static jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil.TEXTURE_ROTATED_90;
 
 @TargetApi(11)
 public class GPUImageTextureRenderer extends GPUImageRenderer implements SurfaceTexture.OnFrameAvailableListener {
@@ -435,11 +438,26 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
 
     @Override
     protected void adjustImageScaling() {
+        float[] texture = TEXTURE_NO_ROTATION;
+        switch (mRotation) {
+            case NORMAL:
+                break;
+            case ROTATION_90:
+                texture = TEXTURE_ROTATED_90;
+                break;
+            case ROTATION_180:
+                texture = TEXTURE_ROTATED_180;
+                break;
+            case ROTATION_270:
+                texture = TEXTURE_ROTATED_270;
+                break;
+        }
         mGLCubeBuffer.clear();
         mGLCubeBuffer.put(CUBE).position(0);
         mGLTextureBuffer.clear();
-        mGLTextureBuffer.put(TEXTURE_NO_ROTATION).position(0);
+        mGLTextureBuffer.put(texture).position(0);
     }
+
 
     public GPUImageFilter getFilter() {
         return mFilter;
