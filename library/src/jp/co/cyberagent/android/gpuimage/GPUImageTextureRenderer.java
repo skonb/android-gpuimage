@@ -116,6 +116,14 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
         initGL();
         initGLComponents();
         if (mFilter != null) {
+            if (!mFilter.isInitialized()) {
+                mFilter.runOnDraw(new Runnable() {
+                    @Override
+                    public void run() {
+                        mFilter.init();
+                    }
+                });
+            }
             mFilter.setGLTexture(GLES20.GL_TEXTURE1);
         }
         Log.d(LOG_TAG, "OpenGL init OK.");
@@ -423,45 +431,11 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
 
     @Override
     protected void adjustImageScaling() {
-//        float outputWidth = mOutputWidth;
-//        float outputHeight = mOutputHeight;
-//        if (mRotation == Rotation.ROTATION_270 || mRotation == Rotation.ROTATION_90) {
-//            outputWidth = mOutputHeight;
-//            outputHeight = mOutputWidth;
-//        }
-//
-//        float ratio1 = outputWidth / mImageWidth;
-//        float ratio2 = outputHeight / mImageHeight;
-//        float ratioMax = Math.max(ratio1, ratio2);
-//        int imageWidthNew = Math.round(mImageWidth * ratioMax);
-//        int imageHeightNew = Math.round(mImageHeight * ratioMax);
-//
-//        float ratioWidth = imageWidthNew / outputWidth;
-//        float ratioHeight = imageHeightNew / outputHeight;
-//
-//        float[] cube = CUBE;
-//        float[] textureCords = TextureRotationUtil.getRotation(mRotation, mFlipHorizontal, mFlipVertical);
-//        if (mScaleType == GPUImage.ScaleType.CENTER_CROP) {
-//            float distHorizontal = (1 - 1 / ratioWidth) / 2;
-//            float distVertical = (1 - 1 / ratioHeight) / 2;
-//            textureCords = new float[]{
-//                    addDistance(textureCords[0], distHorizontal), addDistance(textureCords[1], distVertical),
-//                    addDistance(textureCords[2], distHorizontal), addDistance(textureCords[3], distVertical),
-//                    addDistance(textureCords[4], distHorizontal), addDistance(textureCords[5], distVertical),
-//                    addDistance(textureCords[6], distHorizontal), addDistance(textureCords[7], distVertical),
-//            };
-//        } else {
-//            cube = new float[]{
-//                    CUBE[0] / ratioHeight, CUBE[1] / ratioWidth,
-//                    CUBE[2] / ratioHeight, CUBE[3] / ratioWidth,
-//                    CUBE[4] / ratioHeight, CUBE[5] / ratioWidth,
-//                    CUBE[6] / ratioHeight, CUBE[7] / ratioWidth,
-//            };
-//        }
-
         mGLCubeBuffer.clear();
         mGLCubeBuffer.put(CUBE).position(0);
         mGLTextureBuffer.clear();
         mGLTextureBuffer.put(TEXTURE_NO_ROTATION).position(0);
     }
+
+
 }
