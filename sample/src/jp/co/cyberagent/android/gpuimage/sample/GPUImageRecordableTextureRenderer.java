@@ -103,7 +103,7 @@ public class GPUImageRecordableTextureRenderer extends GPUImageTextureRenderer {
 
 
     @Override
-    protected void onDrawAfterNoFilter() {
+    protected void onDrawAfterFilter() {
         int width = mOutputWidth, height = mOutputHeight;
         if (running) {
             if (frameRecorder == null && width > 0 && height > 0) {

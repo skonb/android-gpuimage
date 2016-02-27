@@ -306,19 +306,24 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         mNoFilter.onDraw(textures[0], mGLCubeBuffer, mGLTextureBuffer);
-
+        onDrawAfterNoFilter();
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glViewport(0, 0, mOutputWidth, mOutputHeight);
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         mFilter.onDraw(offScreenTextures[0], screenCubeBuffer, screenTextureBuffer);
+        onDrawAfterFilter();
 
-        onDrawAfterNoFilter();
         return true;
+
     }
 
     protected void onDrawAfterNoFilter() {
+
+    }
+
+    protected void onDrawAfterFilter() {
 
     }
 
