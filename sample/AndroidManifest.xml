@@ -31,6 +31,8 @@
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".activity.ActivityMovie">
         </activity>
+        <activity android:name=".activity.ActivityCanvas">
+        </activity>
     </application>
 
 </manifest>

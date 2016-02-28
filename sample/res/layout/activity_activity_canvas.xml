@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:res="http://schemas.android.com/apk/res-auto"
+    tools:context="jp.co.cyberagent.android.gpuimage.sample.activity.ActivityCanvas">
+
+    <com.malmstein.fenster.view.FensterVideoView
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        res:scaleType="crop"/>
+</RelativeLayout>

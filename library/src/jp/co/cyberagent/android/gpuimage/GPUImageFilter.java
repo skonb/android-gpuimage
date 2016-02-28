@@ -52,9 +52,9 @@ public class GPUImageFilter {
             "}";
 
 
-    private final LinkedList<Runnable> mRunOnDraw;
-    private String mVertexShader;
-    private String mFragmentShader;
+    protected final LinkedList<Runnable> mRunOnDraw;
+    protected String mVertexShader;
+    protected String mFragmentShader;
     protected int mGLProgId;
     protected int mGLAttribPosition;
     protected int mGLUniformTexture;
@@ -78,19 +78,8 @@ public class GPUImageFilter {
     public void reloadShaders() {
         String fragmentShader = mFragmentShader;
         String vertexShader = mVertexShader;
-        if (mExternalOES) {
-            if (!fragmentShader.contains("#extension GL_OES_EGL_image_external : require\n")) {
-                fragmentShader = "#extension GL_OES_EGL_image_external : require\n" + fragmentShader;
-                fragmentShader = fragmentShader.replaceAll("sampler2D", "samplerExternalOES");
-            }
-        } else {
-            if (fragmentShader.contains("#extension GL_OES_EGL_image_external : require\n")) {
-                fragmentShader = fragmentShader.replace("#extension GL_OES_EGL_image_external : require\n", "");
-                fragmentShader = fragmentShader.replaceAll("samplerExternalOES", "sampler2D");
-            }
-        }
         mVertexShader = vertexShader;
-        mFragmentShader = fragmentShader;
+        mFragmentShader = getExternalOESFragmentShader(fragmentShader, mExternalOES);
         runOnDraw(new Runnable() {
             @Override
             public void run() {
@@ -98,6 +87,22 @@ public class GPUImageFilter {
                 init();
             }
         });
+    }
+
+    public String getExternalOESFragmentShader(String fragmentShader, boolean externalOES) {
+        String res = fragmentShader;
+        if (externalOES) {
+            if (!res.contains("#extension GL_OES_EGL_image_external : require\n")) {
+                res = "#extension GL_OES_EGL_image_external : require\n" + res;
+                res = res.replaceAll("sampler2D", "samplerExternalOES");
+            }
+        } else {
+            if (res.contains("#extension GL_OES_EGL_image_external : require\n")) {
+                res = res.replace("#extension GL_OES_EGL_image_external : require\n", "");
+                res = res.replaceAll("samplerExternalOES", "sampler2D");
+            }
+        }
+        return res;
     }
 
 
@@ -209,7 +214,7 @@ public class GPUImageFilter {
         return mGLUniformTexture;
     }
 
-    public void logError(){
+    public void logError() {
         Log.i("GPUImageFilter", GLUtils.getEGLErrorString(GLES20.glGetError()));
     }
 

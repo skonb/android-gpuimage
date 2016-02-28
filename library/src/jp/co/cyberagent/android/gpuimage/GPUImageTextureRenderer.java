@@ -344,6 +344,7 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
     public void setOutputSize(int width, int height) {
         mOutputWidth = width;
         mOutputHeight = height;
+        mFilter.onOutputSizeChanged(width, height);
     }
 
     public void setVideoSize(final int width, final int height) {
@@ -476,5 +477,16 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
     public GPUImageFilter getFilter() {
         return mFilter;
     }
+
+    @Override
+    public int getFrameWidth() {
+        return super.getFrameWidth();
+    }
+
+    @Override
+    public int getFrameHeight() {
+        return super.getFrameHeight();
+    }
+
 
 }
