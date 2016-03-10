@@ -94,6 +94,9 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
     public void startRenderingToOutput(SurfaceTexture outputTexture, Runnable onInputTextureAvailableCallback) {
         this.outputTexture = outputTexture;
         this.onInputTextureAvailableCallback = onInputTextureAvailableCallback;
+        if (mImageHeight != 0 && mImageWidth != 0) {
+            outputTexture.setDefaultBufferSize(mImageWidth, mImageHeight);
+        }
         mNoFilter.runOnDraw(new Runnable() {
             @Override
             public void run() {
@@ -345,11 +348,17 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
         mOutputWidth = width;
         mOutputHeight = height;
         mFilter.onOutputSizeChanged(width, height);
+        if (outputTexture != null) {
+            outputTexture.setDefaultBufferSize(width, height);
+        }
     }
 
     public void setVideoSize(final int width, final int height) {
-        mImageWidth = width;
-        mImageHeight = height;
+        if (width != mImageWidth || height != mImageHeight) {
+            mImageWidth = width;
+            mImageHeight = height;
+            frameBufferPrepared = false;
+        }
         mNoFilter.runOnDraw(new Runnable() {
             @Override
             public void run() {
@@ -398,6 +407,7 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
 
     private void prepareFramebuffer(int width, int height) {
         if (width == 0 || height == 0) return;
+        releaseFramebuffer();
         // Create a outputTexture object and bind it.  This will be the color buffer.
         GLES20.glGenTextures(1, offScreenTextures, 0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, offScreenTextures[0]);
