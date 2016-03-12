@@ -283,6 +283,9 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
 
         inputTexture = new SurfaceTexture(textures[0]);
         inputTexture.setOnFrameAvailableListener(this);
+        if(mImageWidth !=0 && mImageHeight != 0){
+            inputTexture.setDefaultBufferSize(mImageWidth, mImageHeight);
+        }
         if (onInputTextureAvailableCallback != null) {
             onInputTextureAvailableCallback.run();
         }
@@ -358,6 +361,9 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
             mImageWidth = width;
             mImageHeight = height;
             frameBufferPrepared = false;
+            if (inputTexture != null){
+                inputTexture.setDefaultBufferSize(mImageWidth, mImageHeight);
+            }
         }
         mNoFilter.runOnDraw(new Runnable() {
             @Override
