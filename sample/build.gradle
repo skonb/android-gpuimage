@@ -1,4 +1,23 @@
+buildscript {
+    ext.kotlin_version = '1.0.1'
+    repositories {
+        mavenCentral()
+        jcenter()
+
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.3'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+    }
+}
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+configurations {
+    all*.exclude group: 'org.bytedeco', module: 'javacpp-presets'
+}
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
@@ -8,6 +27,11 @@ android {
         applicationId 'me.skonb.android_gpuimage.sample'
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
+
+        ndk {
+            abiFilters "armeabi", "x86"
+        }
+
     }
 
     sourceSets {
@@ -25,21 +49,69 @@ android {
         instrumentTest.setRoot('tests')
     }
 
+
+    packagingOptions {
+        //Fix duplicate files for ButterKnife and Realm
+        pickFirst 'META-INF/services/javax.annotation.processing.Processor'
+
+        //Fix duplicate files for javacpp-presets
+        pickFirst 'META-INF/maven/org.bytedeco.javacpp-presets/ffmpeg/pom.xml'
+        pickFirst 'META-INF/maven/org.bytedeco.javacpp-presets/ffmpeg/pom.properties'
+        pickFirst 'META-INF/maven/org.bytedeco.javacpp-presets/opencv/pom.xml'
+        pickFirst 'META-INF/maven/org.bytedeco.javacpp-presets/opencv/pom.properties'
+
+        //Fix duplicate files for hamcrest-integration and hamcrest-core
+        exclude 'LICENSE.txt'
+        exclude 'readme'
+
+        pickFirst 'META-INF/maven/com.backendless/commons/pom.xml'
+        pickFirst 'META-INF/maven/com.backendless/commons/pom.properties'
+
+        pickFirst 'com/backendless/commons/AbstractBackendlessCollection.class'
+        pickFirst 'com/backendless/marketplace/model/BIConfigurationItem.class'
+        pickFirst 'weborb/IHTTPSessionObject.class'
+        pickFirst 'com/malmstein/fenster/BuildConfig.class'
+
+        //Exclude all arm64, x64 binaries
+        exclude "lib/armeabi-v7a/libcrashlytics-envelope.so"
+        exclude "lib/armeabi-v7alibcrashlytics.so"
+        exclude "lib/armeabi-v7alibgpuimage-library.so"
+        exclude "lib/arm64-v8a/libcrashlytics-envelope.so"
+        exclude "lib/arm64-v8a/libcrashlytics.so"
+        exclude "lib/arm64-v8a/libgpuimage-library.so"
+        exclude "lib/x86_64/libcrashlytics-envelope.so"
+        exclude "lib/x86_64/libcrashlytics.so"
+        exclude "lib/x86_64/libgpuimage-library.so"
+        exclude "lib/mips64/libcrashlytics-envelope.so"
+        exclude "lib/mips64/libcrashlytics.so"
+        exclude "lib/mips64/libgpuimage-library.so"
+
+
+    }
+
     lintOptions {
         abortOnError true
     }
 }
 repositories {
     jcenter()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url 'https://oss.sonatype.org/content/groups/public' }
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    mavenCentral()
 }
 
 dependencies {
     compile project(':library')
+    compile fileTree(dir: 'src/main/libs', include: ['*.jar', '*.so'])
 //    compile 'jp.co.cyberagent.android.gpuimage:gpuimage-library:+@aar'
     compile 'com.android.support:support-v4:21.+'
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile 'com.github.skonb:fenster:876aaa4d26'
     compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.3'
-    compile 'org.bytedeco:javacv:1.1'
-    compile 'org.bytedeco:javacpp:1.1'
+    compile 'org.bytedeco:javacv:1.2'
+    compile 'org.bytedeco:javacpp:1.2.1'
+    compile 'org.bytedeco.javacpp-presets:ffmpeg:3.0.2-1.2'
+    compile 'org.bytedeco.javacpp-presets:opencv:3.1.0-1.2'
+
+
 }

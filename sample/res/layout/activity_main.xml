@@ -1,7 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:drawableTop="@android:drawable/ic_menu_gallery"
-            android:text="Gallery"/>
+            android:text="Gallery" />
 
         <Button
             android:id="@+id/button_camera"
@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:drawableTop="@android:drawable/ic_menu_camera"
-            android:text="Camera"/>
+            android:text="Camera" />
 
         <Button
             android:id="@+id/button_movie"
@@ -32,14 +32,22 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:drawableTop="@android:drawable/ic_menu_more"
-            android:text="Movie"/>
+            android:text="Movie" />
 
         <Button
             android:id="@+id/button_canvas"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawableTop="@android:drawable/ic_menu_agenda"
-            android:text="Canvas"/>
+
+            android:text="Canvas" />
+
+        <Button
+            android:id="@+id/button_texture_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@android:drawable/ic_menu_agenda"
+            android:text="Texture Camera" />
     </LinearLayout>
 
 </FrameLayout>

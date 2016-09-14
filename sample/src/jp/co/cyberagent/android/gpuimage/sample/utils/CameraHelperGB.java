@@ -70,3 +70,5 @@ public class CameraHelperGB implements CameraHelperImpl {
         return -1;
     }
 }
+
+
