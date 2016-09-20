@@ -43,12 +43,32 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     static final int N = 2;
     static final int WIDTH = 0;
     static final int HEIGHT = 1;
-    static final float[] SCREEN_CUBE = {
-            1.0f, 1.0f,
+    static final float LEFT_CUBE[] = {
+            -1.0f, -1.0f,
+            0.0f, -1.0f,
             -1.0f, 1.0f,
-            1.0f, -1.0f,
-            -1.0f, -1.0f
+            0.0f, 1.0f,
     };
+    static final float RIGHT_CUBE[] = {
+            0.0f, -1.0f,
+            1.0f, -1.0f,
+            0.0f, 1.0f,
+            1.0f, 1.0f,
+    };
+    static final float TOP_CUBE[] = {
+            -1.0f, -1.0f,
+            1.0f, -1.0f,
+            -1.0f, 0.0f,
+            1.0f, 0.0f,
+    };
+    static final float BOTTOM_CUBE[] = {
+            -1.0f, 0.0f,
+            1.0f, 0.0f,
+            -1.0f, 1.0f,
+            1.0f, 1.0f,
+    };
+
+
     static final float[] SCREEN_TEXTURE = {
             0.0f, 0.0f,
             1.0f, 0.0f,
@@ -62,14 +82,18 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
 
     public GPUImageDualTextureRenderer(final GPUImageFilter filter) {
         super(filter);
-        screenCubeBuffer = ByteBuffer.allocateDirect(CUBE.length * 4)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-        screenCubeBuffer.put(CUBE).position(0);
-        screenTextureBuffer = ByteBuffer.allocateDirect(SCREEN_TEXTURE.length * 4)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-        screenTextureBuffer.put(SCREEN_TEXTURE).position(0);
+        for (int i = 0; i < N; ++i) {
+            screenCubeBuffers[i] = ByteBuffer.allocateDirect(CUBE.length * 4)
+                    .order(ByteOrder.nativeOrder())
+                    .asFloatBuffer();
+            screenTextureBuffers[i] = ByteBuffer.allocateDirect(SCREEN_TEXTURE.length * 4)
+                    .order(ByteOrder.nativeOrder())
+                    .asFloatBuffer();
+
+            screenTextureBuffers[i].put(SCREEN_TEXTURE).position(0);
+        }
+        screenCubeBuffers[0].put(LEFT_CUBE).position(0);
+        screenCubeBuffers[1].put(RIGHT_CUBE).position(0);
     }
 
     protected static final int EGL_OPENGL_ES2_BIT = 4;
@@ -83,8 +107,8 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
 
     protected boolean running;
     GPUImageFilter mNoFilter = new GPUImageFilter();
-    protected FloatBuffer screenCubeBuffer;
-    protected FloatBuffer screenTextureBuffer;
+    protected FloatBuffer[] screenCubeBuffers = new FloatBuffer[N];
+    protected FloatBuffer[] screenTextureBuffers = new FloatBuffer[N];
 
 
     public void startRenderingToOutput(SurfaceTexture outputTexture, Runnable onInputTextureAvailableCallback) {
@@ -327,7 +351,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         for (int i = 0; i < N; ++i) {
-            mFilter.onDraw(offScreenTextures[i], screenCubeBuffer, screenTextureBuffer);
+            mFilter.onDraw(offScreenTextures[i], screenCubeBuffers[i], screenTextureBuffers[i]);
         }
         onDrawAfterFilter();
 
