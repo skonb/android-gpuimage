@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="jp.co.cyberagent.android.gpuimage.sample"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="jp.co.cyberagent.android.gpuimage.sample">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- For images from picasa -->
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -19,23 +19,20 @@
             android:name=".activity.ActivityMain"
             android:label="@string/title_activity_activity_main">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.ActivityGallery"/>
+        <activity android:name=".activity.ActivityGallery" />
         <activity
             android:name=".activity.ActivityCamera"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".activity.ActivityMovie">
-        </activity>
-        <activity android:name=".activity.ActivityCanvas">
-        </activity>
-        <activity android:name=".activity.ActivityTextureCamera">
-        </activity>
-
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".activity.ActivityMovie"></activity>
+        <activity android:name=".activity.ActivityCanvas"></activity>
+        <activity android:name=".activity.ActivityTextureCamera"></activity>
+        <activity android:name=".activity.ActivityDualMovie"></activity>
     </application>
 
 </manifest>

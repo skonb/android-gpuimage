@@ -48,6 +48,13 @@
             android:layout_height="wrap_content"
             android:drawableTop="@android:drawable/ic_menu_agenda"
             android:text="Texture Camera" />
+
+        <Button
+            android:id="@+id/button_dual_movie"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@android:drawable/ic_menu_more"
+            android:text="Dual Movie" />
     </LinearLayout>
 
 </FrameLayout>

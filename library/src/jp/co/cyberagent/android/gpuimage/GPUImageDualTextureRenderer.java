@@ -106,30 +106,50 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     protected EGLSurface eglSurface;
 
     protected boolean running;
+    protected boolean starting;
     GPUImageFilter mNoFilter = new GPUImageFilter();
     protected FloatBuffer[] screenCubeBuffers = new FloatBuffer[N];
     protected FloatBuffer[] screenTextureBuffers = new FloatBuffer[N];
 
 
-    public void startRenderingToOutput(SurfaceTexture outputTexture, Runnable onInputTextureAvailableCallback) {
-        this.outputTexture = outputTexture;
-        this.onInputTextureAvailableCallback = onInputTextureAvailableCallback;
-//        if (mImageHeight != 0 && mImageWidth != 0) {
-//            outputTexture.setDefaultBufferSize(mImageWidth, mImageHeight);
-//        }
-        mNoFilter.runOnDraw(new Runnable() {
-            @Override
-            public void run() {
-                mNoFilter.init();
-                mNoFilter.setExternalOES(true);
+    public void startRenderingToOutput(SurfaceTexture outputTexture, final Runnable onInputTextureAvailableCallback) {
+        synchronized (this) {
+            if (!starting && !running) {
+                starting = true;
+                this.outputTexture = outputTexture;
+                this.onInputTextureAvailableCallback = onInputTextureAvailableCallback;
+                mNoFilter.runOnDraw(new Runnable() {
+                    @Override
+                    public void run() {
+                        mNoFilter.init();
+                        mNoFilter.setExternalOES(true);
+                    }
+                });
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        GPUImageDualTextureRenderer.this.run();
+                    }
+                }).start();
+            } else {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            while (starting) {
+                                Thread.sleep(50);
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (onInputTextureAvailableCallback != null) {
+                            onInputTextureAvailableCallback.run();
+                        }
+
+                    }
+                }).start();
             }
-        });
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                GPUImageDualTextureRenderer.this.run();
-            }
-        }).start();
+        }
     }
 
     public boolean isStarted() {
@@ -137,15 +157,16 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     }
 
     public void run() {
-        running = true;
         try {
             //Waiting for subclass constructor
             Thread.sleep(100);
         } catch (InterruptedException e) {
 
         }
+        running = true;
         initGL();
         initGLComponents();
+        starting = false;
         if (mFilter != null) {
             if (!mFilter.isInitialized()) {
                 mFilter.runOnDraw(new Runnable() {

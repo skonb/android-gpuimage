@@ -35,6 +35,7 @@ public class ActivityMain extends Activity implements OnClickListener {
         findViewById(R.id.button_movie).setOnClickListener(this);
         findViewById(R.id.button_canvas).setOnClickListener(this);
         findViewById(R.id.button_texture_camera).setOnClickListener(this);
+        findViewById(R.id.button_dual_movie).setOnClickListener(this);
     }
 
     @Override
@@ -54,6 +55,10 @@ public class ActivityMain extends Activity implements OnClickListener {
                 break;
             case R.id.button_texture_camera:
                 startActivity(ActivityTextureCamera.class);
+                break;
+            case R.id.button_dual_movie:
+                startActivity(ActivityDualMovie.class);
+                break;
             default:
                 break;
         }
