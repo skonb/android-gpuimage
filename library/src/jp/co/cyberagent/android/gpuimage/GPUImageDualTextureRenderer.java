@@ -161,6 +161,17 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     protected SplitDirection splitDirection = SplitDirection.Horizontal;
     FloatBuffer[] glTextureBuffers = new FloatBuffer[N];
 
+    public float[][] getCurrentCubes() {
+        return currentCubes;
+    }
+
+    public FloatBuffer[] getScreenTextureBuffers() {
+        return screenTextureBuffers;
+    }
+
+    public FloatBuffer[] getScreenCubeBuffers() {
+        return screenCubeBuffers;
+    }
 
     public void startRenderingToOutput(SurfaceTexture outputTexture, final Runnable onInputTextureAvailableCallback) {
         synchronized (this) {
