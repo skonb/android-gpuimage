@@ -97,6 +97,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
             screenTextureBuffers[i].put(SCREEN_TEXTURE).position(0);
             glTextureBuffers[i] = ByteBuffer.allocateDirect(SCREEN_TEXTURE.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
             scaleTypes[i] = GPUImage.ScaleType.CENTER_CROP;
+            rotations[i] = Rotation.NORMAL;
         }
 
         screenCubeBuffers[0].put(TOP_CUBE).position(0);
@@ -708,6 +709,6 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
 
     @Override
     public void setRotation(Rotation rotation) {
-        setRotation(0, rotation);
+
     }
 }
