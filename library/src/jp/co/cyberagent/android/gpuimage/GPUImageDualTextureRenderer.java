@@ -155,8 +155,8 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     protected boolean running;
     protected boolean starting;
     GPUImageFilter mNoFilter = new GPUImageFilter();
-    protected FloatBuffer[] screenCubeBuffers = new FloatBuffer[N];
-    protected FloatBuffer[] screenTextureBuffers = new FloatBuffer[N];
+    FloatBuffer[] screenCubeBuffers = new FloatBuffer[N];
+    FloatBuffer[] screenTextureBuffers = new FloatBuffer[N];
     float[][] currentCubes = new float[N][8];
     protected SplitDirection splitDirection = SplitDirection.Horizontal;
     FloatBuffer[] glTextureBuffers = new FloatBuffer[N];
