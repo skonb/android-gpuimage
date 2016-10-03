@@ -722,4 +722,21 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     public void setRotation(Rotation rotation) {
 
     }
+
+    @Override
+    public void setScaleType(GPUImage.ScaleType scaleType) {
+        for (int i = 0; i < N; ++i) {
+            setScaleType(i, scaleType);
+        }
+    }
+
+    public void setScaleType(final int index, GPUImage.ScaleType scaleType) {
+        scaleTypes[index] = scaleType;
+        runOnDraw(new Runnable() {
+            @Override
+            public void run() {
+                adjustImageScaling(index);
+            }
+        });
+    }
 }
