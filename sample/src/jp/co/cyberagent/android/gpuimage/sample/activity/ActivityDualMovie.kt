@@ -16,6 +16,7 @@ import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools
 import jp.co.cyberagent.android.gpuimage.sample.R
 import kotlinx.android.synthetic.main.activity_dual_movie.*
 import wseemann.media.FFmpegMediaMetadataRetriever
+import java.util.*
 
 class ActivityDualMovie : Activity(), View.OnClickListener {
 
@@ -34,17 +35,20 @@ class ActivityDualMovie : Activity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dual_movie)
-        video_view.renderer = Renderer()
+        val renderer = Renderer()
+        video_view.renderer = renderer
         filter = (video_view.renderer as GPUImageDualTextureRenderer).filter
         video_view.setVideo(0, "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4", 0)
         video_view.setVideo(1, "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4", 0)
-        video_view.setOnPreparedListener { mediaPlayer ->
-
-        }
         video_view.start(0)
         video_view.start(1)
         findViewById(R.id.button_choose_filter).setOnClickListener(this)
         findViewById(R.id.button_choose_movie).setOnClickListener(this)
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                (video_view.renderer as Renderer).setSplitDirection(GPUImageDualTextureRenderer.SplitDirection.Horizontal)
+            }
+        }, 1000)
     }
 
 

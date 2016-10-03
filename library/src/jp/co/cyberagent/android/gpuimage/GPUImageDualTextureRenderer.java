@@ -40,6 +40,10 @@ import static jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil.TEXTURE
 
 @TargetApi(11)
 public class GPUImageDualTextureRenderer extends GPUImageRenderer implements SurfaceTexture.OnFrameAvailableListener {
+    public enum SplitDirection {
+        Horizontal, Vertical
+    }
+
     static final int N = 2;
     static final int WIDTH = 0;
     static final int HEIGHT = 1;
@@ -91,9 +95,51 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
                     .asFloatBuffer();
 
             screenTextureBuffers[i].put(SCREEN_TEXTURE).position(0);
+            glTextureBuffers[i] = ByteBuffer.allocateDirect(SCREEN_TEXTURE.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+            scaleTypes[i] = GPUImage.ScaleType.CENTER_CROP;
         }
-        screenCubeBuffers[0].put(LEFT_CUBE).position(0);
-        screenCubeBuffers[1].put(RIGHT_CUBE).position(0);
+
+        screenCubeBuffers[0].put(TOP_CUBE).position(0);
+        screenCubeBuffers[1].put(BOTTOM_CUBE).position(0);
+        currentCubes[0] = TOP_CUBE;
+        currentCubes[1] = BOTTOM_CUBE;
+        splitDirection = SplitDirection.Vertical;
+    }
+
+    Rotation[] rotations = new Rotation[N];
+
+    public void setRotation(int index, Rotation rotation) {
+        rotations[index] = rotation;
+    }
+
+    public void setSplitDirection(SplitDirection splitDirection) {
+        this.splitDirection = splitDirection;
+        switch (splitDirection) {
+            case Horizontal:
+                screenCubeBuffers[0].clear();
+                screenCubeBuffers[0].put(LEFT_CUBE).position(0);
+                screenCubeBuffers[1].clear();
+                screenCubeBuffers[1].put(RIGHT_CUBE).position(0);
+                currentCubes[0] = LEFT_CUBE;
+                currentCubes[1] = RIGHT_CUBE;
+                break;
+            case Vertical:
+                screenCubeBuffers[0].clear();
+                screenCubeBuffers[0].put(TOP_CUBE).position(0);
+                screenCubeBuffers[1].clear();
+                screenCubeBuffers[1].put(BOTTOM_CUBE).position(0);
+                currentCubes[0] = TOP_CUBE;
+                currentCubes[1] = BOTTOM_CUBE;
+                break;
+        }
+        runOnDraw(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < N; ++i) {
+                    adjustImageScaling(i);
+                }
+            }
+        });
     }
 
     protected static final int EGL_OPENGL_ES2_BIT = 4;
@@ -110,6 +156,9 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     GPUImageFilter mNoFilter = new GPUImageFilter();
     protected FloatBuffer[] screenCubeBuffers = new FloatBuffer[N];
     protected FloatBuffer[] screenTextureBuffers = new FloatBuffer[N];
+    float[][] currentCubes = new float[N][8];
+    protected SplitDirection splitDirection = SplitDirection.Horizontal;
+    FloatBuffer[] glTextureBuffers = new FloatBuffer[N];
 
 
     public void startRenderingToOutput(SurfaceTexture outputTexture, final Runnable onInputTextureAvailableCallback) {
@@ -312,6 +361,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     private int[][] imageSizes = new int[N][2];
     private float[][] videoTextureTransforms = new float[N][16];
 
+
     private boolean[] frameAvailable = {
             false, false
     };
@@ -320,6 +370,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     private int[] renderBuffers = new int[N];
     private int[] offScreenTextures = new int[N];
     private boolean[] frameBufferPrepared = new boolean[N];
+    private GPUImage.ScaleType[] scaleTypes = new GPUImage.ScaleType[N];
 
     private void setupTexture() {
         GLES20.glGenTextures(N, textures, 0);
@@ -362,7 +413,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
             GLES20.glViewport(0, 0, imageSizes[i][WIDTH], imageSizes[i][HEIGHT]);
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-            mNoFilter.onDraw(textures[i], mGLCubeBuffer, mGLTextureBuffer);
+            mNoFilter.onDraw(textures[i], mGLCubeBuffer, glTextureBuffers[i]);
         }
         onDrawAfterNoFilter();
 
@@ -415,9 +466,9 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     }
 
     public void setVideoSize(final int index, final int width, final int height) {
-        if (width != imageSizes[index][0] || height != imageSizes[index][1]) {
-            imageSizes[index][0] = width;
-            imageSizes[index][1] = height;
+        if (width != imageSizes[index][WIDTH] || height != imageSizes[index][HEIGHT]) {
+            imageSizes[index][WIDTH] = width;
+            imageSizes[index][HEIGHT] = height;
             frameBufferPrepared[index] = false;
             if (inputTextures[index] != null) {
                 inputTextures[index].setDefaultBufferSize(width, height);
@@ -428,6 +479,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
             public void run() {
                 //NoFilter's output is a framebuffer, therefore it's size is the video size, not the display size.
                 adjustImageScaling();
+                adjustImageScaling(index);
                 mNoFilter.onOutputSizeChanged(width, height);
             }
         });
@@ -536,24 +588,107 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
 
     @Override
     protected void adjustImageScaling() {
-        float[] texture = TEXTURE_NO_ROTATION;
-        switch (mRotation) {
-            case NORMAL:
-                break;
-            case ROTATION_90:
-                texture = TEXTURE_ROTATED_90;
-                break;
-            case ROTATION_180:
-                texture = TEXTURE_ROTATED_180;
-                break;
-            case ROTATION_270:
-                texture = TEXTURE_ROTATED_270;
-                break;
+        for (int i = 0; i < N; ++i) {
+            float[] texture = TEXTURE_NO_ROTATION;
+            switch (rotations[i]) {
+                case NORMAL:
+                    break;
+                case ROTATION_90:
+                    texture = TEXTURE_ROTATED_90;
+                    break;
+                case ROTATION_180:
+                    texture = TEXTURE_ROTATED_180;
+                    break;
+                case ROTATION_270:
+                    texture = TEXTURE_ROTATED_270;
+                    break;
+            }
+            glTextureBuffers[i].clear();
+            glTextureBuffers[i].put(texture).position(0);
         }
         mGLCubeBuffer.clear();
         mGLCubeBuffer.put(CUBE).position(0);
-        mGLTextureBuffer.clear();
-        mGLTextureBuffer.put(texture).position(0);
+    }
+
+    protected void adjustImageScaling(int index) {
+        float[] cube = new float[8];
+        float[] texture = new float[8];
+        float videoWidth = imageSizes[index][WIDTH];
+        float videoHeight = imageSizes[index][HEIGHT];
+        float outputWidth = 0;
+        float outputHeight = 0;
+        float videoAR = videoWidth / videoHeight;
+        switch (splitDirection) {
+            case Horizontal:
+                outputWidth = mOutputWidth / 2;
+                outputHeight = mOutputHeight;
+                break;
+            case Vertical:
+                outputWidth = mOutputWidth;
+                outputHeight = mOutputHeight / 2;
+                break;
+        }
+        if (outputHeight == 0 || outputWidth == 0 || videoWidth == 0 || videoHeight == 0) {
+            return;
+        }
+
+        float outputAR = outputWidth / outputHeight;
+        switch (scaleTypes[index]) {
+            case CENTER_INSIDE:
+                if (videoAR > outputAR) {
+                    float yOffset = (1f - videoHeight / videoWidth * (outputWidth / outputHeight)) / 2f;
+                    float actualOffset = (currentCubes[index][5] - currentCubes[index][1]) * yOffset;
+                    cube = new float[]{
+                            currentCubes[index][0], currentCubes[index][1] + actualOffset,
+                            currentCubes[index][2], currentCubes[index][3] + actualOffset,
+                            currentCubes[index][4], currentCubes[index][5] - actualOffset,
+                            currentCubes[index][6], currentCubes[index][7] - actualOffset
+
+                    };
+                } else {
+                    float xOffset = (1f - videoWidth / videoHeight * (outputHeight / outputWidth)) / 2f;
+                    float actualOffset = (currentCubes[index][2] - currentCubes[index][0]) * xOffset;
+                    cube = new float[]{
+                            currentCubes[index][0] + actualOffset, currentCubes[index][1],
+                            currentCubes[index][2] - actualOffset, currentCubes[index][3],
+                            currentCubes[index][4] + actualOffset, currentCubes[index][5],
+                            currentCubes[index][6] - actualOffset, currentCubes[index][7]
+                    };
+                }
+                screenTextureBuffers[index].clear();
+                screenTextureBuffers[index].put(SCREEN_TEXTURE).position(0);
+                screenCubeBuffers[index].clear();
+                screenCubeBuffers[index].put(cube).position(0);
+                break;
+            case CENTER_CROP:
+                if (videoAR > outputAR) {
+                    {
+                        float xOffset = (1f - outputWidth / videoWidth * (videoHeight / outputHeight)) / 2f;
+                        texture = new float[]{
+                                SCREEN_TEXTURE[0] + xOffset, SCREEN_TEXTURE[1],
+                                SCREEN_TEXTURE[2] - xOffset, SCREEN_TEXTURE[3],
+                                SCREEN_TEXTURE[4] + xOffset, SCREEN_TEXTURE[5],
+                                SCREEN_TEXTURE[6] - xOffset, SCREEN_TEXTURE[7],
+                        };
+                    }
+
+                } else {
+                    {
+                        float yOffset = (1f - outputHeight / videoHeight * (videoWidth / outputWidth)) / 2f;
+                        texture = new float[]{
+                                SCREEN_TEXTURE[0], SCREEN_TEXTURE[1] + yOffset,
+                                SCREEN_TEXTURE[2], SCREEN_TEXTURE[3] + yOffset,
+                                SCREEN_TEXTURE[4], SCREEN_TEXTURE[5] - yOffset,
+                                SCREEN_TEXTURE[6], SCREEN_TEXTURE[7] - yOffset,
+                        };
+                    }
+                }
+                screenTextureBuffers[index].clear();
+                screenTextureBuffers[index].put(texture).position(0);
+                screenCubeBuffers[index].clear();
+                screenCubeBuffers[index].put(currentCubes[index]).position(0);
+                break;
+        }
     }
 
 
@@ -571,5 +706,8 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
         return super.getFrameHeight();
     }
 
-
+    @Override
+    public void setRotation(Rotation rotation) {
+        setRotation(0, rotation);
+    }
 }
