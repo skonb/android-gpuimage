@@ -111,6 +111,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
 
     public void setRotation(int index, Rotation rotation) {
         rotations[index] = rotation;
+        adjustImageScaling(index);
     }
 
     public void setSplitDirection(SplitDirection splitDirection) {
