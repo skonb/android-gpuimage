@@ -625,7 +625,6 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
 
     protected void adjustImageScaling(int index) {
         float[] cube = new float[8];
-        float[] texture = new float[8];
         float videoWidth = imageSizes[index][WIDTH];
         float videoHeight = imageSizes[index][HEIGHT];
         float outputWidth = 0;
@@ -646,6 +645,20 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
         }
 
         float outputAR = outputWidth / outputHeight;
+        float[] texture = TEXTURE_NO_ROTATION;
+        switch (rotations[index]) {
+            case NORMAL:
+                break;
+            case ROTATION_90:
+                texture = TEXTURE_ROTATED_90;
+                break;
+            case ROTATION_180:
+                texture = TEXTURE_ROTATED_180;
+                break;
+            case ROTATION_270:
+                texture = TEXTURE_ROTATED_270;
+                break;
+        }
         switch (scaleTypes[index]) {
             case CENTER_INSIDE:
                 if (videoAR > outputAR) {
@@ -669,7 +682,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
                     };
                 }
                 screenTextureBuffers[index].clear();
-                screenTextureBuffers[index].put(SCREEN_TEXTURE).position(0);
+                screenTextureBuffers[index].put(texture).position(0);
                 screenCubeBuffers[index].clear();
                 screenCubeBuffers[index].put(cube).position(0);
                 break;
@@ -678,10 +691,10 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
                     {
                         float xOffset = (1f - outputWidth / videoWidth * (videoHeight / outputHeight)) / 2f;
                         texture = new float[]{
-                                SCREEN_TEXTURE[0] + xOffset, SCREEN_TEXTURE[1],
-                                SCREEN_TEXTURE[2] - xOffset, SCREEN_TEXTURE[3],
-                                SCREEN_TEXTURE[4] + xOffset, SCREEN_TEXTURE[5],
-                                SCREEN_TEXTURE[6] - xOffset, SCREEN_TEXTURE[7],
+                                texture[0] + xOffset, texture[1],
+                                texture[2] - xOffset, texture[3],
+                                texture[4] + xOffset, texture[5],
+                                texture[6] - xOffset, texture[7],
                         };
                     }
 
@@ -689,10 +702,10 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
                     {
                         float yOffset = (1f - outputHeight / videoHeight * (videoWidth / outputWidth)) / 2f;
                         texture = new float[]{
-                                SCREEN_TEXTURE[0], SCREEN_TEXTURE[1] + yOffset,
-                                SCREEN_TEXTURE[2], SCREEN_TEXTURE[3] + yOffset,
-                                SCREEN_TEXTURE[4], SCREEN_TEXTURE[5] - yOffset,
-                                SCREEN_TEXTURE[6], SCREEN_TEXTURE[7] - yOffset,
+                                texture[0], texture[1] + yOffset,
+                                texture[2], texture[3] + yOffset,
+                                texture[4], texture[5] - yOffset,
+                                texture[6], texture[7] - yOffset,
                         };
                     }
                 }
