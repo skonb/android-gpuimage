@@ -59,13 +59,13 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
             0.0f, 1.0f,
             1.0f, 1.0f,
     };
-    static final float TOP_CUBE[] = {
+    static final float BOTTOM_CUBE[] = {
             -1.0f, -1.0f,
             1.0f, -1.0f,
             -1.0f, 0.0f,
             1.0f, 0.0f,
     };
-    static final float BOTTOM_CUBE[] = {
+    static final float TOP_CUBE[] = {
             -1.0f, 0.0f,
             1.0f, 0.0f,
             -1.0f, 1.0f,
