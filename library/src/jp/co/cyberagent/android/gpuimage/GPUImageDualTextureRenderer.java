@@ -111,6 +111,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
 
     public void setRotation(int index, Rotation rotation) {
         rotations[index] = rotation;
+        adjustImageScaling();
         adjustImageScaling(index);
     }
 
@@ -645,20 +646,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
         }
 
         float outputAR = outputWidth / outputHeight;
-        float[] texture = TEXTURE_NO_ROTATION;
-        switch (rotations[index]) {
-            case NORMAL:
-                break;
-            case ROTATION_90:
-                texture = TEXTURE_ROTATED_90;
-                break;
-            case ROTATION_180:
-                texture = TEXTURE_ROTATED_180;
-                break;
-            case ROTATION_270:
-                texture = TEXTURE_ROTATED_270;
-                break;
-        }
+        float[] texture = new float[8];
         switch (scaleTypes[index]) {
             case CENTER_INSIDE:
                 if (videoAR > outputAR) {
@@ -682,7 +670,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
                     };
                 }
                 screenTextureBuffers[index].clear();
-                screenTextureBuffers[index].put(texture).position(0);
+                screenTextureBuffers[index].put(SCREEN_TEXTURE).position(0);
                 screenCubeBuffers[index].clear();
                 screenCubeBuffers[index].put(cube).position(0);
                 break;
