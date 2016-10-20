@@ -99,8 +99,12 @@ public class GPUImageCanvasOverlayFilter extends GPUImageFilter implements Surfa
         super.onDraw(textureId, cubeBuffer, textureBuffer);
         if (canvasSurface != null) {
             if (frameAvailable) {
-                canvasTexture.updateTexImage();
-                frameAvailable = false;
+                try {
+                    canvasTexture.updateTexImage();
+                    frameAvailable = false;
+                } catch (IllegalStateException e) {
+                    e.printStackTrace();
+                }
             }
             GLES20.glUseProgram(canvasProgram);
             canvasCubeBuffer.position(0);
