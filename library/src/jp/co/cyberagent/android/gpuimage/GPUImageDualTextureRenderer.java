@@ -628,10 +628,22 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
         float[] cube = new float[8];
         float videoWidth = imageSizes[index][WIDTH];
         float videoHeight = imageSizes[index][HEIGHT];
+        switch (rotations[index]) {
+            case ROTATION_90:
+            case ROTATION_270:
+                float temp = videoWidth;
+                videoWidth = videoHeight;
+                videoHeight = temp;
+                break;
+
+        }
+
         float outputWidth = 0;
         float outputHeight = 0;
         float videoAR = videoWidth / videoHeight;
-        switch (splitDirection) {
+        switch (splitDirection)
+
+        {
             case Horizontal:
                 outputWidth = mOutputWidth / 2;
                 outputHeight = mOutputHeight;
@@ -641,13 +653,18 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
                 outputHeight = mOutputHeight / 2;
                 break;
         }
-        if (outputHeight == 0 || outputWidth == 0 || videoWidth == 0 || videoHeight == 0) {
+
+        if (outputHeight == 0 || outputWidth == 0 || videoWidth == 0 || videoHeight == 0)
+
+        {
             return;
         }
 
         float outputAR = outputWidth / outputHeight;
         float[] texture = new float[8];
-        switch (scaleTypes[index]) {
+        switch (scaleTypes[index])
+
+        {
             case CENTER_INSIDE:
                 if (videoAR > outputAR) {
                     float yOffset = (1f - videoHeight / videoWidth * (outputWidth / outputHeight)) / 2f;
@@ -703,6 +720,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
                 screenCubeBuffers[index].put(currentCubes[index]).position(0);
                 break;
         }
+
     }
 
 
