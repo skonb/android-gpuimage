@@ -628,15 +628,16 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
         float[] cube = new float[8];
         float videoWidth = imageSizes[index][WIDTH];
         float videoHeight = imageSizes[index][HEIGHT];
-        switch (rotations[index]) {
-            case ROTATION_90:
-            case ROTATION_270:
-                float temp = videoWidth;
-                videoWidth = videoHeight;
-                videoHeight = temp;
-                break;
-
-        }
+//        switch (rotations[index]) {
+//            case ROTATION_90:
+//            case ROTATION_270:
+//                float temp = videoWidth;
+//                videoWidth = videoHeight;
+//                videoHeight = temp;
+//                break;
+//            default:
+//                break;
+//        }
 
         float outputWidth = 0;
         float outputHeight = 0;
