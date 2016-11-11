@@ -108,7 +108,7 @@ dependencies {
 
 
     compile 'com.android.support:support-v4:22.2.1'
-    compile 'com.github.skonb:fenster:577989bf13'
+    compile 'com.github.skonb:fenster:3e717fe474'
     compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.3'
     compile 'org.bytedeco:javacv:1.2'
     compile 'org.bytedeco:javacpp:1.2.1'

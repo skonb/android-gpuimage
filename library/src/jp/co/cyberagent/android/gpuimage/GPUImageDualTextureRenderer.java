@@ -26,12 +26,15 @@ import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
+
+import jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil;
 
 import static jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil.TEXTURE_NO_ROTATION;
 import static jp.co.cyberagent.android.gpuimage.util.TextureRotationUtil.TEXTURE_ROTATED_180;
@@ -96,7 +99,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
 
             screenTextureBuffers[i].put(SCREEN_TEXTURE).position(0);
             glTextureBuffers[i] = ByteBuffer.allocateDirect(SCREEN_TEXTURE.length * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
-            scaleTypes[i] = GPUImage.ScaleType.CENTER_CROP;
+            scaleTypes[i] = GPUImage.ScaleType.CENTER_INSIDE;
             rotations[i] = Rotation.NORMAL;
         }
 
@@ -138,6 +141,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
         runOnDraw(new Runnable() {
             @Override
             public void run() {
+                adjustImageScaling();
                 for (int i = 0; i < N; ++i) {
                     adjustImageScaling(i);
                 }
@@ -409,6 +413,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
                 if (frameAvailable[i]) {
                     inputTextures[i].updateTexImage();
                     inputTextures[i].getTransformMatrix(videoTextureTransforms[i]);
+                    Log.i("test", Arrays.toString(videoTextureTransforms[i]));
                     frameAvailable[i] = false;
                 }
             }
@@ -427,7 +432,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
             GLES20.glViewport(0, 0, imageSizes[i][WIDTH], imageSizes[i][HEIGHT]);
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-            mNoFilter.onDraw(textures[i], mGLCubeBuffer, glTextureBuffers[i]);
+            mNoFilter.onDraw(textures[i], mGLCubeBuffer, glTextureBuffers[i], videoTextureTransforms[i]);
         }
         onDrawAfterNoFilter();
 
@@ -603,20 +608,7 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     @Override
     protected void adjustImageScaling() {
         for (int i = 0; i < N; ++i) {
-            float[] texture = TEXTURE_NO_ROTATION;
-            switch (rotations[i]) {
-                case NORMAL:
-                    break;
-                case ROTATION_90:
-                    texture = TEXTURE_ROTATED_90;
-                    break;
-                case ROTATION_180:
-                    texture = TEXTURE_ROTATED_180;
-                    break;
-                case ROTATION_270:
-                    texture = TEXTURE_ROTATED_270;
-                    break;
-            }
+            float[] texture = TextureRotationUtil.getRotation(rotations[i], false, true);
             glTextureBuffers[i].clear();
             glTextureBuffers[i].put(texture).position(0);
         }

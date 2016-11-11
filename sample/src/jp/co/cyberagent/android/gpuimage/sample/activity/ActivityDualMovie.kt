@@ -3,6 +3,7 @@ package jp.co.cyberagent.android.gpuimage.sample.activity
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -23,6 +24,7 @@ class ActivityDualMovie : Activity(), View.OnClickListener {
 
     internal val REQUEST_PICK_MOVIE = 1001
     internal var filter: GPUImageFilter? = null
+    val mediaPlayers: Array<MediaPlayer?> = arrayOf(null, null)
 
     internal inner class Renderer : GPUImageDualTextureRenderer, FensterDualVideoView.Renderer {
         constructor() : super() {
@@ -40,8 +42,14 @@ class ActivityDualMovie : Activity(), View.OnClickListener {
         filter = (video_view.renderer as GPUImageDualTextureRenderer).filter
         video_view.setVideo(0, "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4", 0)
         video_view.setVideo(1, "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4", 0)
-        video_view.start(0)
-        video_view.start(1)
+        for (i in 0..1) {
+            video_view?.setOnPreparedListener(i, { mediaPlayer ->
+                mediaPlayers[i] = mediaPlayer
+                if (mediaPlayers[0] != null && mediaPlayers[1] != null) {
+                    video_view?.start()
+                }
+            })
+        }
         findViewById(R.id.button_choose_filter).setOnClickListener(this)
         findViewById(R.id.button_choose_movie).setOnClickListener(this)
         Timer().schedule(object : TimerTask() {
