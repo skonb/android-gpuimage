@@ -413,7 +413,6 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
                 if (frameAvailable[i]) {
                     inputTextures[i].updateTexImage();
                     inputTextures[i].getTransformMatrix(videoTextureTransforms[i]);
-                    Log.i("test", Arrays.toString(videoTextureTransforms[i]));
                     frameAvailable[i] = false;
                 }
             }
