@@ -607,7 +607,8 @@ public class GPUImageDualTextureRenderer extends GPUImageRenderer implements Sur
     @Override
     protected void adjustImageScaling() {
         for (int i = 0; i < N; ++i) {
-            float[] texture = TextureRotationUtil.getRotation(rotations[i], false, true);
+            float[] texture = TextureRotationUtil.getRotation(Rotation.NORMAL, false, true);
+//            float[] texture = TextureRotationUtil.getRotation(rotations[i], false, true);
             glTextureBuffers[i].clear();
             glTextureBuffers[i].put(texture).position(0);
         }
