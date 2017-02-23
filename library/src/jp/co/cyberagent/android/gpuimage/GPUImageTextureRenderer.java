@@ -283,7 +283,7 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
 
         inputTexture = new SurfaceTexture(textures[0]);
         inputTexture.setOnFrameAvailableListener(this);
-        if(mImageWidth !=0 && mImageHeight != 0){
+        if (mImageWidth != 0 && mImageHeight != 0) {
             inputTexture.setDefaultBufferSize(mImageWidth, mImageHeight);
         }
         if (onInputTextureAvailableCallback != null) {
@@ -311,7 +311,7 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
         GLES20.glViewport(0, 0, mImageWidth, mImageHeight);
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        mNoFilter.onDraw(textures[0], mGLCubeBuffer, mGLTextureBuffer);
+        mNoFilter.onDraw(textures[0], mGLCubeBuffer, mGLTextureBuffer, videoTextureTransform);
         onDrawAfterNoFilter();
 
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
@@ -361,7 +361,7 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
             mImageWidth = width;
             mImageHeight = height;
             frameBufferPrepared = false;
-            if (inputTexture != null){
+            if (inputTexture != null) {
                 inputTexture.setDefaultBufferSize(mImageWidth, mImageHeight);
             }
         }
@@ -469,20 +469,8 @@ public class GPUImageTextureRenderer extends GPUImageRenderer implements Surface
 
     @Override
     protected void adjustImageScaling() {
-        float[] texture = TEXTURE_NO_ROTATION;
-        switch (mRotation) {
-            case NORMAL:
-                break;
-            case ROTATION_90:
-                texture = TEXTURE_ROTATED_90;
-                break;
-            case ROTATION_180:
-                texture = TEXTURE_ROTATED_180;
-                break;
-            case ROTATION_270:
-                texture = TEXTURE_ROTATED_270;
-                break;
-        }
+//        float[] texture = TextureRotationUtil.getRotation(mRotation, false, true);
+        float[] texture = TextureRotationUtil.getRotation(Rotation.NORMAL, false, true);
         mGLCubeBuffer.clear();
         mGLCubeBuffer.put(CUBE).position(0);
         mGLTextureBuffer.clear();

@@ -37,7 +37,7 @@ public class ActivityMovie extends Activity implements View.OnClickListener {
     FensterVideoView videoView;
     GPUImageFilter filter = null;
 
-    class Renderer extends GPUImageRecordableTextureRenderer implements FensterVideoView.Renderer {
+    class Renderer extends GPUImageTextureRenderer implements FensterVideoView.Renderer {
         public Renderer() {
             super();
         }

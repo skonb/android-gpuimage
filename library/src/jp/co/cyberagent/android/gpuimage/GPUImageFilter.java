@@ -34,11 +34,12 @@ public class GPUImageFilter {
             "attribute vec4 inputTextureCoordinate;\n" +
             " \n" +
             "varying vec2 textureCoordinate;\n" +
+            "uniform mediump mat4 textureMatrix;\n" +
             " \n" +
             "void main()\n" +
             "{\n" +
             "    gl_Position = position;\n" +
-            "    textureCoordinate = inputTextureCoordinate.xy;\n" +
+            "    textureCoordinate = (textureMatrix * inputTextureCoordinate).xy;\n" +
             "}";
     public static final String NO_FILTER_FRAGMENT_SHADER = "" +
             "precision mediump float;\n" +
@@ -58,12 +59,15 @@ public class GPUImageFilter {
     protected int mGLProgId;
     protected int mGLAttribPosition;
     protected int mGLUniformTexture;
+    protected int mGLUniformTextureMatrix;
     protected int mGLAttribTextureCoordinate;
     protected int mOutputWidth;
     protected int mOutputHeight;
     private boolean mIsInitialized;
     protected int mGLTexture = GLES20.GL_TEXTURE0;
     protected boolean mExternalOES;
+    protected float[] identityMatrix = new float[]{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
 
     public GPUImageFilter() {
         this(NO_FILTER_VERTEX_SHADER, NO_FILTER_FRAGMENT_SHADER);
@@ -118,6 +122,7 @@ public class GPUImageFilter {
         mGLUniformTexture = GLES20.glGetUniformLocation(mGLProgId, "inputImageTexture");
         mGLAttribTextureCoordinate = GLES20.glGetAttribLocation(mGLProgId,
                 "inputTextureCoordinate");
+        mGLUniformTextureMatrix = GLES20.glGetUniformLocation(mGLProgId, "textureMatrix");
         GLES20.glUseProgram(mGLProgId);
         mIsInitialized = true;
     }
@@ -141,6 +146,11 @@ public class GPUImageFilter {
 
     public void onDraw(final int textureId, final FloatBuffer cubeBuffer,
                        final FloatBuffer textureBuffer) {
+        onDraw(textureId, cubeBuffer, textureBuffer, identityMatrix);
+    }
+
+    public void onDraw(final int textureId, final FloatBuffer cubeBuffer,
+                       final FloatBuffer textureBuffer, final float[] textureMatrix) {
 
         GLES20.glUseProgram(mGLProgId);
         runPendingOnDrawTasks();
@@ -164,6 +174,7 @@ public class GPUImageFilter {
             }
             GLES20.glUniform1i(mGLUniformTexture, mGLTexture - GLES20.GL_TEXTURE0);
         }
+        GLES20.glUniformMatrix4fv(mGLUniformTextureMatrix, 1, false, textureMatrix, 0);
         onDrawArraysPre();
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         GLES20.glDisableVertexAttribArray(mGLAttribPosition);

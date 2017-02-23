@@ -95,8 +95,13 @@ public class GPUImageCanvasOverlayFilter extends GPUImageFilter implements Surfa
     }
 
     @Override
-    public void onDraw(int textureId, FloatBuffer cubeBuffer, FloatBuffer textureBuffer) {
-        super.onDraw(textureId, cubeBuffer, textureBuffer);
+    public void onDraw(final int textureId, final FloatBuffer cubeBuffer,
+                       final FloatBuffer textureBuffer) {
+        onDraw(textureId, cubeBuffer, textureBuffer, identityMatrix);
+    }
+    @Override
+    public void onDraw(int textureId, FloatBuffer cubeBuffer, FloatBuffer textureBuffer, final float[] textureMatrix) {
+        super.onDraw(textureId, cubeBuffer, textureBuffer, textureMatrix);
         if (canvasSurface != null) {
             if (frameAvailable) {
                 canvasTexture.updateTexImage();
@@ -113,6 +118,7 @@ public class GPUImageCanvasOverlayFilter extends GPUImageFilter implements Surfa
             GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0]);
             GLES20.glUniform1i(canvasUniformTexture, 2);
+            GLES20.glUniformMatrix4fv(mGLUniformTextureMatrix, 1, false, textureMatrix, 0);
             GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
             GLES20.glDisableVertexAttribArray(canvasAttribPosition);
             GLES20.glDisableVertexAttribArray(canvasAttribTextureCoordinate);
